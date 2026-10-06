@@ -22,7 +22,7 @@
 1. Copy `nts_claude_dev/.claude/` + `.mcp.json` vào root workspace của project (chỗ chứa thư mục Unity).
 2. Tạo `CLAUDE.md` của project từ `nts_claude_dev/CLAUDE.md`: sửa **Stack** (Unity version, RP, platform), **Layout** (đường dẫn thật). Thông tin riêng của game chỉ ghi ở đây.
 3. Path-glob trong rules đã chuẩn hoá `**/Assets/...` (khớp cả Unity ở root lẫn lồng thư mục). Còn cứng: `design/narrative/**`, `Unity/design/...` trong `publish-gdd` — xem MAP.md §7.
-4. Mở Unity Editor, bật MCP server (cổng khớp `.mcp.json`) → thử `ping`.
+4. Mở Unity Editor, bật MCP server (cổng khớp `.mcp.json`) → `set_active_instance` đúng project (có thể đang mở nhiều Editor) → thử `ping`.
 5. (Tuỳ chọn) `graphify update Assets/Scripts` để có đồ thị code; `graphify hook install` để tự cập nhật theo commit.
 6. Đảm bảo `.gitignore` bỏ qua `CLAUDE.local.md`, `.claude/settings.local.json`, log hook, `graphify-out/` (hoặc đặt output ngoài `Assets`).
 
@@ -31,7 +31,7 @@
 | File | Vai trò | Chứa |
 |---|---|---|
 | `CLAUDE.md` | **Chung**: áp dụng TẤT CẢ rule + skill trong ClaudeDev | Stack, Layout, Workflow, trỏ về `MAP.md`; dòng import `@<stt>_claude.md`. Không chứa thông tin riêng game |
-| `<stt>_claude.md` (vd `37_claude.md`, `36_claude.md`) | **Riêng**: tập trung vào đúng game/project đó | Mô tả & mục tiêu, danh mục/phạm vi, plugin có sẵn, quy ước đặc thù (input, art style, asmdef, save-key prefix), kiến trúc riêng, trạng thái hiện tại, quyết định đã chốt |
+| `<stt>_claude.md` (vd `37_claude.md`, `36_claude.md`) | **Riêng**: tập trung vào đúng game/project đó | `profile` (NTS/Restored/Custom — MAP.md §1b), `unity_root`, `mcp_instance`, mô tả & mục tiêu, danh mục/phạm vi, plugin có sẵn, quy ước đặc thù (input, art style, asmdef, save-key prefix), kiến trúc riêng, trạng thái hiện tại, quyết định đã chốt |
 
 Quy ước:
 - `<stt>` = số thứ tự project (TRG37 → `37_claude.md`). Đặt cạnh `CLAUDE.md` ở root workspace của game.
@@ -64,10 +64,13 @@ Bảng rule → glob → nội dung: **[MAP.md §3](MAP.md)** (không lặp ở 
 
 ## 5. Hard rules chung (cross-cutting, chi tiết ở rules)
 
+> Mục gắn `(NTS)` chỉ áp cho project profile `NTS`; project `Restored`/`Custom` giữ cấu trúc hiện có (MAP.md §1b). `rules/evidence.md` (nhãn bằng chứng, báo cáo trung thực) áp dụng mọi profile.
+
 - `[SerializeField] private`, không `public` field cho Inspector.
 - Không `Find*`/`GetComponent` trong `Update`/`FixedUpdate` — cache ở `Awake`. Hot path **zero-alloc** (pool, reuse, không LINQ/`new`).
 - Subscribe `OnEnable`, unsubscribe `OnDisable`/`OnDestroy`, kill tween. Subscribe event của singleton khác: `TrySubscribe()` idempotent, gọi ở **cả** `OnEnable` lẫn `Start`.
-- Persistence chỉ qua wrapper `Core/SaveManager`. Log chỉ qua `Core/Log` (`[Conditional("UNITY_EDITOR")]`).
+- (NTS) Persistence chỉ qua wrapper `Core/SaveManager`. Log chỉ qua `Core/Log` (`[Conditional("UNITY_EDITOR")]`).
+- Giữ `.meta`/GUID; không đổi tên class/field/asset path đã có khi chưa kiểm tra tác động (`rules/asset-integrity.md`).
 - Không `using UnityEditor` trong code runtime (Gameplay/UI/MiniGames). Phải build được Android.
 - Không coroutine-as-lifecycle (`IEnumerator Start()`); dùng `void Start()` + named routine.
 - Plugin bên thứ ba thiếu → **STOP và báo user**, không stub/reimplement. Lưu ý asmdef cần ref riêng.

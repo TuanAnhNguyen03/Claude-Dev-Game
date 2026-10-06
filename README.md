@@ -1,6 +1,6 @@
 # Claude-Dev-Game
 
-> Bộ **scaffold + quy chuẩn làm việc với Claude Code** dùng chung cho mọi game Unity mobile. **Version 1.0.0** · Private.
+> Bộ **scaffold + quy chuẩn làm việc với Claude Code** dùng chung cho mọi game Unity mobile. **Version 1.0.1** · Private.
 
 ## Mục đích
 
@@ -20,15 +20,18 @@ Không chứa code game, asset hay thông tin riêng của một game cụ thể
 | 1 | **`CLAUDE.md`** (entry chung) | Checklist áp dụng vào project mới, danh sách skill/tool global, hard rules, workflow, quy ước hierarchy & render order Unity |
 | 2 | **`MAP.md`** (bản đồ, SSOT) | Thứ tự đọc 6 tầng, cây thư mục, bảng rule→glob, sơ đồ workflow, bảng template→rules_ref→plugin, bảng "việc nào dùng skill nào", danh sách điểm chưa thống nhất |
 | 3 | **Quy tắc 2 file mỗi game** | `CLAUDE.md` (chung, áp dụng toàn bộ rule+skill) + `<stt>_claude.md` (riêng, vd `37_claude.md`, import bằng `@37_claude.md`) |
-| 4 | **11 rules** (`.claude/rules/`) | Tự nạp theo path-glob `**/Assets/...`: prototype/engine/gameplay/ui/ai/network/tests/data/shader/design-docs/narrative |
+| 4 | **14 rules** (`.claude/rules/`) | Tự nạp theo path-glob `**/Assets/...`: prototype/engine/gameplay/ui/ai/network/tests/data/shader/design-docs/narrative + **asset-integrity** (GUID/.meta), **unity-project** (pin version/package/SDK), **evidence** (luôn nạp: nhãn bằng chứng, báo cáo trung thực) |
 | 5 | **9 slash command** (`.claude/commands/`) | `/blueprint` `/plan` `/execute` `/review` `/commit` `/finish` `/debug` `/teach` `/publish-gdd` |
-| 6 | **Subagent `@dev`** | Senior Unity dev: Mode A trích template từ code (kèm báo drift), Mode B code feature theo template → rules → convention; có quyền `mcp__UnityMCP__*` |
-| 7 | **11 templates** (`.claude/templates/`) | Singleton base, game-state-machine, sound-manager, platform-haptic, data-asset-scriptable, data-manager-orchestrator, user-data-persistence, menu-manager, dialog-pooled, ui-anim-base, gdd-sheet-page |
+| 6 | **3 subagent** | `@dev` (Mode A trích template + báo drift, Mode B code feature), `@reviewer` (review chỉ đọc), `@qa` (xác minh Editor: import, Console, scene/prefab, build; báo pass/fail/not-run kèm bằng chứng) |
+| 7 | **12 templates** (`.claude/templates/`) | mono-behaviour, singleton base, game-state-machine, sound-manager, platform-haptic, data-asset-scriptable, data-manager-orchestrator, user-data-persistence, menu-manager, dialog-pooled, ui-anim-base, gdd-sheet-page |
 | 8 | **7 hook + statusline** | session-start/stop, pre/post-compact, notify, log-agent (log subagent), statusline |
 | 9 | **`settings.json`** | Allow/deny quyền an toàn (chặn `rm -rf`, force-push, reset --hard, đọc `.env`) + đăng ký hook |
 | 10 | **`.mcp.json`** | Kết nối UnityMCP `http://127.0.0.1:8080/mcp` |
 | 11 | **Skill `unity-mcp`** | Quy trình làm việc với MCP For Unity |
-| 12 | **Templates file Claude** | `nts_claude_dev/CLAUDE.md` (chung) và `stt_claude.template.md` (riêng game) |
+| 12 | **Templates file Claude** | `nts_claude_dev/CLAUDE.md` (chung) và `stt_claude.template.md` (riêng game, có `profile` / `unity_root` / `mcp_instance`) |
+| 13 | **Profile** `NTS` / `Restored` / `Custom` | Cùng một bộ rule dùng được cho game dựng mới theo NTS lẫn project phục hồi/port (giữ GUID, giữ cấu trúc cũ) — `MAP.md` §1b |
+| 14 | **Registry project** | Chỉ mục project trong workspace (Editor version, profile gợi ý, việc cần làm để theo chuẩn) — `MAP.md` §8 |
+| 15 | **`AGENTS.md`** | Entry cho agent khác (Codex...) trỏ về cùng bộ quy chuẩn |
 
 ## Skill/tool global đi kèm quy trình (cài riêng, không nằm trong repo)
 
@@ -50,7 +53,7 @@ Thứ tự ưu tiên khi xung đột: `<stt>_claude.md` > `CLAUDE.md` project > 
 Claude-Dev-Game/
 ├─ CLAUDE.md
 ├─ MAP.md
-├─ README.md · CHANGELOG.md · VERSION
+├─ AGENTS.md · README.md · CHANGELOG.md · VERSION
 └─ nts_claude_dev/
    ├─ CLAUDE.md · stt_claude.template.md · .mcp.json · .gitignore
    └─ .claude/ { settings.json, statusline.sh, rules/, commands/, agents/, templates/, hooks/, skills/ }

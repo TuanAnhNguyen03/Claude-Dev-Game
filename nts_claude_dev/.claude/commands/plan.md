@@ -14,7 +14,7 @@ Ask clarifying questions if needed:
 - Any reference files or existing patterns to follow?
 
 ## Step 2: Collect SMART POLE Context Atoms
-> **Reference**: Read the `smart-pole-context-analyzer` skill (global) before proceeding.
+> **Reference**: If the `smart-pole-context-analyzer` skill exists (global), read it first; if not installed, apply the atoms below manually (do not claim the skill ran).
 
 Before research, scan for **SP-Flaws** (missing atoms):
 
@@ -38,7 +38,7 @@ Before research, scan for **SP-Flaws** (missing atoms):
 
 ## Step 3: Design Exploration (If Needed)
 > **Trigger**: If the feature is ambiguous, has multiple viable approaches,
-> or involves architecture decisions — invoke the `brainstorming` skill FIRST.
+> or involves architecture decisions — invoke the `brainstorming` skill FIRST if installed; otherwise list 2-3 approaches + trade-offs manually.
 
 Checklist - skip to Step 4 if ALL are "No":
 - [ ] Is the scope ambiguous? (user said "make X better" without specifics)

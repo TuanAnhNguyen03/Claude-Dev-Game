@@ -5,6 +5,10 @@
 > Chỉ ghi thứ riêng của game này. Rule/skill chung ở `CLAUDE.md` + `../MAP.md`; không lặp lại.
 > Không nới lỏng hard rules chung; ngoại lệ phải ghi rõ + lý do ở mục 5.
 
+profile: {{NTS | Restored | Custom}}   <!-- xem MAP.md §1b; mặc định NTS -->
+unity_root: {{thư mục chứa Assets/ + ProjectSettings/}}
+mcp_instance: {{Name@hash hoặc tên project — dùng với set_active_instance}}
+
 ## 1. Tổng quan
 - Tên / mã: {{GAME_NAME}} ({{STT}})
 - Mục tiêu / hypothesis: {{...}}

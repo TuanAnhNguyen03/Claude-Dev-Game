@@ -1,6 +1,6 @@
 ---
 paths:
-  - "design/narrative/**"
+  - "**/design/narrative/**"
 ---
 
 # Narrative Rules
