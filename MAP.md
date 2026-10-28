@@ -33,22 +33,24 @@ ClaudeDev/
 ├─ CLAUDE.md                    entry workspace-level (generic, mọi game)
 ├─ MAP.md                       bản đồ này
 ├─ AGENTS.md                    entry cho agent khác (Codex...) → trỏ về CLAUDE.md + MAP.md
-├─ README.md · CHANGELOG.md · VERSION
+├─ README.md · TOOLING_STATUS.md · CHANGELOG.md · VERSION
 ├─ CLAUDE.md.bak-*              backup — KHÔNG đọc, KHÔNG nạp
 └─ nts_claude_dev/              scaffold (git repo riêng) — copy sang mỗi project
+   ├─ AGENTS.md                 TEMPLATE entry Codex ở root repo từng game (điền {{placeholder}})
    ├─ CLAUDE.md                 TEMPLATE CLAUDE.md chung của project (điền {{placeholder}})
    ├─ stt_claude.template.md    TEMPLATE file riêng game → đổi tên <stt>_claude.md (vd 37_claude.md)
    ├─ .mcp.json                 UnityMCP http://127.0.0.1:8080/mcp
-   ├─ .gitignore                bỏ qua Unity/, brain/, CLAUDE.local.md, settings.local.json
+   ├─ .gitignore                bỏ qua Unity/, brain/, CLAUDE.local.md, settings.local.json + khối file Unity/SDK tự sinh (copy vào repo game)
    ├─ production/session-state/ output hook (git-keep)
    └─ .claude/
       ├─ settings.json          permissions allow/deny + 7 hook + statusline
       ├─ statusline.sh
-      ├─ rules/        (14)     luật code, auto-load theo glob  → §3
+      ├─ rules/        (20)     luật code, auto-load theo glob  → §3
       ├─ commands/     (9)      slash command                    → §4
       ├─ agents/        (3)      dev (Mode A extract / Mode B code) · reviewer (read-only) · qa (Editor verify)
-      ├─ templates/    (12)     skeleton tái dùng cho @dev       → §5
-      ├─ hooks/        (7)      session-start/stop, compact, notify, log-agent
+      ├─ templates/    (13)     skeleton tái dùng cho @dev       → §5
+      ├─ hooks/        (8)      session-start/stop, compact, notify, log-agent, task-intake (UserPromptSubmit)
+      ├─ scripts/               adb-device.sh (ADB/LDPlayer: check/install/launch/shot/logcat/perf)
       └─ skills/unity-mcp/      quy trình MCP For Unity (scaffold)
 ```
 
@@ -57,7 +59,14 @@ ClaudeDev/
 
 | Rule | Glob chính | Nội dung cốt lõi |
 |---|---|---|
+| `git-release.md` | luôn nạp (không glob) | không checkout khi Editor mở, không push submodule dùng chung (patch `CustomPatchTools/`), pointer phải có trên remote, file được/không được track, meta mồ côi, kiểm tra trước push |
+| `android-build.md` | `**/ProjectSettings/**`, `**/Assets/Plugins/Android/**`, `**/*.java`, `**/*.gradle`, `*.androidlib`, Build Profiles, `Ads Settings.asset` | ASTC, compression Default, IL2CPP OptimizeSize, Gradle AppsFlyer, Java ASCII, build MCP đồng bộ, keystore, checklist ads release (NTS foundation) |
+| `ads-integration.md` | `**/Scripts/**/*Ads*.cs`, `GameManager.cs`, `Settings.cs`, `ScStatic.cs`, `nts-unity-foundation/**` | gọi thẳng `GameNativeHandle`/`AdsManager`/`NativeAdBridge` 1 dòng mỗi thời điểm, logic tiếp tục trong callback; không thêm guard Ready/internet/organic/cap, không chuỗi inter→reward; `ScStatic.LevelCurrent/LevelLog` = property đọc level thật (không level → đếm số lần start) |
+| `mobile-performance.md` | `**/Assets/**/Scripts/**`, `ProjectSettings/{Quality,Time,Project}Settings.asset` | FPS (Android mặc định 30, vSync làm mất targetFrameRate), `FrameRateGovernor` (tier RAM/API, màn tĩnh 30, pin/tự hạ), gcIncremental/MT/Swappy, Max Allowed Timestep 0,1, không đọc `.name`/chuỗi trong FixedUpdate, memo raycast UI, màn ẩn không tốn CPU, quy trình audit |
+| `device-testing.md` | nạp khi claim chạy trên máy/emulator (qa, `/device-test`) | ADB đúng 1 target, evidence thật, emulator ≠ máy thấp, không đổi system |
+| `variant-port.md` | nạp khi port giữa các bản clone (A/B/C) | identity list, phân loại diff bằng script, 3-way merge, submodule dùng chung, meta/GUID, dòng sản phẩm qua data, token |
 | `evidence.md` | luôn nạp (không glob) | nhãn OBSERVED/REPORTED/PROPOSED/UNKNOWN, chỉ claim theo đúng loại bằng chứng, `set_active_instance` khi nhiều Editor, thiếu plugin → blocker không stub |
+| `token-discipline.md` | luôn nạp (không glob) | trả lời ≤8 dòng data-only, đọc hẹp, MCP phân trang, ảnh scale ≤0.5, lịch sử ra docs, 1 Unity MCP, phiên mới giữa task |
 | `asset-integrity.md` | `**/Assets/**` | giữ `.meta`/GUID, move qua AssetDatabase, không đổi tên class/field khi chưa kiểm tra |
 | `unity-project.md` | `**/Assets/**`, `**/Packages/**`, `**/ProjectSettings/**` | pin Editor version, giữ package/setting, SDK phải thật (shim phải đánh dấu) |
 | `prototype-code.md` | `**/Assets/Scripts/**`, `prototypes/**` | baseline (mục `(NTS profile)` chỉ cho NTS): clean arch, event-driven, SerializeField, cache ở Awake, TrySubscribe, zero-alloc, SaveManager, Log, no UnityEditor, plugin STOP-and-warn, UI back-path |
@@ -77,7 +86,7 @@ ClaudeDev/
 /blueprint (cả sản phẩm → cây feature)          ┐
 /plan  ──duyệt──▶ /execute ──▶ /review ──▶ /commit ──▶ /finish
    task.md + implementation_plan.md     @dev Mode B bắt buộc       walkthrough.md
-/debug (bug)   /teach (debrief)   /publish-gdd (gdd-sheet.md → html, commit local, không push)
+/debug (bug)   /device-test (ADB/LD9)   /teach (debrief)   /publish-gdd (gdd-sheet.md → html, commit local, không push)
 ```
 - Artifact task: `brain/<slug>/{task.md, implementation_plan.md, walkthrough.md}`.
 - `/execute`: Data → Core → Gameplay/UI → Tests; save `task.md` sau mỗi layer.
@@ -98,17 +107,22 @@ ClaudeDev/
 | `menu-manager` | ui, engine | — |
 | `dialog-pooled` | ui | DOTween |
 | `ui-anim-base` | ui | DOTween |
+| `frame-rate-governor` | engine, prototype, mobile-performance | — |
 | `gdd-sheet-page.html` | — | dùng bởi `/publish-gdd` |
 
 ## 6. Skill: ai làm gì
 
+Trạng thái cài đặt thực tế và mức bằng chứng: [TOOLING_STATUS.md](TOOLING_STATUS.md). Bảng dưới đây mô tả cách dùng khi công cụ khả dụng, không xác nhận skill Claude đã được nạp trong Codex.
+
 | Việc | Skill / tool |
 |---|---|
+| Setup SDK + ads NTS foundation (phase cuối, sau khi user xác nhận) | `nts-ads-setup` — kit `D:\1.Game_UNITY\4.SkillDev\NTS-Ads-Setup` |
 | Thao tác Unity Editor (scene/prefab/script/console/test/screenshot) | `unity-mcp-skill` (global, đầy đủ) — `unity-mcp` (scaffold, quy trình) |
 | Kiến trúc mobile, mini-game, local multiplayer, save, perf, APK | `unity-mobile-arch` |
 | Viết/sửa code | `ponytail` ladder → `ponytail-review` trước commit, `-audit` định kỳ |
 | Hiểu cấu trúc code | `graphify` — đọc `graphify-out/GRAPH_REPORT.md` trước; `graphify update <Scripts>` sau khi sửa |
 | Art style FLAT/PPU160 | `tr37-art-style` (chỉ game dùng style này) |
+| Test trên máy/emulator (Android) | `/device-test` + `scripts/adb-device.sh` + `rules/device-testing.md` (ADB platform-tools; LDPlayer 9) |
 | HTML/GDD/artifact | `webapp-testing`, `playwright-cli`, `frontend-design`, `web-artifacts-builder` — **không** test game Unity |
 
 ## 7. Điểm chưa thống nhất đã phát hiện (cần người quyết)
@@ -123,7 +137,11 @@ ClaudeDev/
 | 6 | `ui-code.md` yêu cầu "keyboard/mouse AND gamepad" — game mobile touch-first | mâu thuẫn | **Đã sửa v1.0.1** → input theo profile/`<stt>_claude.md`, mặc định touch-first |
 | 7 | `prototype-code.md` nêu ví dụ riêng một game; rule NTS áp lên project không-NTS | rò thông tin / áp sai | **Đã sửa v1.0.1** → bỏ ví dụ riêng, gắn nhãn `(NTS profile)` |
 | 8 | `unity-mcp` (scaffold) trùng `unity-mcp-skill` (global) | 2 nguồn hướng dẫn MCP | Quy ước: global = tra cứu tool, scaffold = quy trình |
-| 9 | Lệnh dùng `docs/learned/`, `brain/`, `CLAUDE.local.md` nhưng không có sẵn | AI tìm file không tồn tại | Tạo khi dùng; `CLAUDE.local.md` đã gitignore |
+| 10 | Hai bản `adb.exe` (platform-tools và `LDPlayer9/`) | xung đột phiên bản làm server adb chết | Dùng 1 bản (PATH); ghi ở `rules/device-testing.md` |
+| 11 | `unity-mcp` (scaffold) còn path cứng `D:\Project_unity\...` (cũ) | AI tìm sai đường dẫn | **Đã sửa v1.1.0** → đọc từ `<stt>_claude.md`; thêm mục nhiều Editor (port theo tên project) |
+| 12 | `finish.md` ghi vào `.agents/`, `GEMINI.md`, script FAISS (của Gemini/Antigravity) | học xong ghi vào file không tồn tại | **Đã sửa v1.1.0** → `<stt>_claude.md` / scaffold (hỏi user) / `.claude/learned/` |
+| 13 | `design-docs`/`blueprint` luôn xếp ads/analytics vào OUT | mâu thuẫn game có NTS foundation | **Đã sửa v1.1.0** → OUT mặc định, IN khi project có ads stack |
+| 9 | Lệnh dùng `.claude/learned/`, `brain/`, `CLAUDE.local.md` nhưng không có sẵn | AI tìm file không tồn tại | Tạo khi dùng; `CLAUDE.local.md` đã gitignore |
 
 ## 8. Registry project trong workspace `D:/1.Game UNITY/2.TRG` (quét 2026-10-06)
 
@@ -132,9 +150,9 @@ Chỉ là chỉ mục để chọn profile; chi tiết game nằm ở `<stt>_cla
 | stt | Project | Unity root | Editor | Profile gợi ý | Hiện có | Cần làm để theo chuẩn |
 |---|---|---|---|---|---|---|
 | 24 | PRJ_TRG24-color-asmr | `trg24-color-asmr/trg24_color_asmr` (thư mục ngoài có `Assets/` rỗng — không mở) | 6000.1.17f1 | NTS (skill `unity-mobile-arch` đúc kết từ game này) | chỉ `.claude/settings.local.json` | copy scaffold + tạo `CLAUDE.md` + `24_claude.md` |
-| 37 | PRJ_TRG37_Minigame | `trg37-minigame` | 6000.1.17f1 | NTS | `.claude/skills` (Unity MCP), `.mcp.json` | tạo `CLAUDE.md` + `37_claude.md` (nội dung lấy từ `CLAUDE.md.bak-20261006`) |
+| 37 | PRJ_TRG37_Minigame | `trg37-minigame` | 6000.1.17f1 | NTS | `CLAUDE.md`, `AGENTS.md`, `37_claude.md`, `.claude/{rules,commands,agents,templates,hooks,skills}`, `.mcp.json` (chuẩn hoá cục bộ 2026-10-06) | Xem `TRG37_AUDIT_2026-10-06.md` và `TRG37_RETENTION_2026-10-06.md` tại workspace project; Play Mode/Android build/device vẫn cần kiểm tra trước phát hành. |
 | 42 | PRJ_TRG42_Unboxing | `Unity/TRG42-Unboxing` | 6000.1.17f1 | Custom (kiến trúc Domain/Core/UI/Shell/Features/Integrations) | `AGENTS.md`, `Docs/` (ARCHITECTURE, DECISIONS, RULES_AND_SKILLS), `brain/` | thêm `CLAUDE.md` + `42_claude.md`; giữ `AGENTS.md` |
-| 51 | PRJ_TRG51_Ragdoll_Kick | thư mục project (root = Unity root) | **6000.3.25f1** | Restored | `CLAUDE.md`, `.claude/{rules,agents,commands,templates,skills}` riêng | đổi `CLAUDE.md` thành bản chung + `51_claude.md`; rules riêng đã được gộp thành `asset-integrity`/`unity-project`/`evidence` ở repo này |
+| 51 | PRJ_TRG51_Ragdoll_Kick | thư mục project (root = Unity root) | **6000.3.25f1** | Restored (+ NTS foundation qua patch) | `CLAUDE.md` + `51_claude.md`, `.claude/` cục bộ; release v1.0.0 (2026-10-08) | nguồn bài học v1.1.0 (`git-release`, `android-build`); copy 2 rule mới vào `.claude/rules/` |
 
 Lưu ý chung: nhiều Editor có thể mở cùng lúc → luôn `set_active_instance`. Editor version khác nhau giữa project → đọc `ProjectVersion.txt`. Nguồn rip/tham chiếu nằm ngoài (`D:.Game UNITY.RIPPER_DUC`), coi là read-only.
 

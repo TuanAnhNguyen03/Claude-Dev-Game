@@ -34,7 +34,7 @@ Classify the bug based on user description and initial evidence:
 ## Step 1.5: Check Known Gotchas
 // turbo
 Before debugging, check known issues:
-1. Read `docs/learned/` files — search for symptoms matching the bug description
+1. Read `.claude/learned/` files — search for symptoms matching the bug description
 2. If match found → apply known fix first, verify
 3. If no match → continue to Step 2
 
@@ -67,7 +67,7 @@ State: "Simple approach isn't working. Switching to disciplined phase-gated debu
 Ask user to test in Play Mode and verify Unity Console is clear of errors.
 
 ### 3.2 Document (if non-obvious root cause)
-Add to relevant `docs/learned/` file:
+Add to relevant `.claude/learned/` file:
 ```markdown
 ### [Module] [Short symptom description]
 - **Symptom**: [what user saw]

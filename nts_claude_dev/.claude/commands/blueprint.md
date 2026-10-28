@@ -64,7 +64,9 @@ Read SSOT files first to avoid duplicate patterns and missed coverage:
 - `P0 / Must`: without it there is no game (core loop, input, win/lose, persistence)
 - `P1 / Should`: quality lift (SFX, VFX, juice, pause/settings)
 - `P2 / Could`: nice-to-have (achievements, themes, daily reward)
-- `OUT`: explicitly excluded (IAP, ads, multiplayer…) — listed in Release Scope
+- `OUT`: explicitly excluded (default IAP, ads, multiplayer…; ads/analytics are IN when the project ships `nts-unity-foundation`) — listed in Release Scope
+
+**Ads/SDK feature** (when IN): one feature `Fxx Ads & SDK (nts-unity-foundation)`, priority after all P0/P1, depends on every gameplay/UI feature, status `blocked: waits user confirmation`. Steps follow `NTS-Ads-Setup/checklists/01..04`.
 
 **Dependencies**: draw a DAG — feature B depends on A if it needs A's types/events/scene. Features without dependencies → parallelizable later.
 
@@ -89,7 +91,7 @@ Create the following under `brain/<product-slug>/`:
 
 ## Release Scope (per design-docs.md)
 - **IN (MVP)**: Splash, Menu, Pause, Settings, GameOver, persistence, ≥1 SFX, ≥1 VFX, <…P0 features>
-- **OUT**: IAP, ads, analytics, leaderboard, localization, multi-mode
+- **OUT**: IAP, ads, analytics, leaderboard, localization, multi-mode (move ads/analytics to IN for projects with an ads stack)
 
 ## Feature Tree
 | ID  | Feature              | Priority | Layer(s)         | Rule ref               | Depends on | Est. |

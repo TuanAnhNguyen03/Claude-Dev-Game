@@ -13,13 +13,16 @@ MCP is the tool connection. It does not replace project architecture, code revie
 
 ## Project Context
 
-For TR37, follow `D:\Project_unity\ClaudeDev\CLAUDE.md` and the NTS rules in `.claude/rules/`.
+The target project, its Unity root, `profile` and MCP instance come from the project's `<stt>_claude.md` (`unity_root`, `mcp_instance`). Follow the project `CLAUDE.md`, `MAP.md` and the rules in `.claude/rules/` for that profile.
 
-The target Unity project is:
+Keep the project's assembly boundaries and framework intact. Do not modify unrelated scenes, prefabs, catalogs, or packages.
 
-`D:\Project_unity\UNITY\TR37_Minigame_clone\trg37-minigame\trg37-minigame`
+## Several Editors open (common in this workspace)
 
-Keep the assembly boundaries and mini-game framework intact. Do not modify unrelated scenes, prefabs, catalogs, or packages.
+- Read `mcpforunity://instances`, `set_active_instance` to the intended `Name@hash`, then confirm project name/path from Editor state before any write.
+- Hash and socket port change when an Editor restarts. Never reuse a remembered port: resolve it by project name from `~/.unity-mcp/unity-mcp-status-*.json` (the file whose project path matches `unity_root`).
+- A write sent to the wrong Editor is a real change in another game: if it happens, stop, check that project's `git status`, and report it.
+- `Editor.log` is shared across open Editors; filter by project path before trusting a log or build report.
 
 ## Startup Checklist
 
@@ -74,7 +77,7 @@ Inspect the current Unity scene and the relevant scripts/prefabs first. Do not m
 Then use an implementation prompt with explicit scope:
 
 ```text
-Modify only the identified files and Unity objects. Follow CLAUDE.md, the NTS architecture, and applicable .claude/rules. After editing, check the Unity Console and validate the relevant scene in Play Mode.
+Modify only the identified files and Unity objects. Follow CLAUDE.md, <stt>_claude.md (profile), and applicable .claude/rules. After editing, check the Unity Console and validate the relevant scene in Play Mode.
 ```
 
 ## MCP Usage Rules
@@ -87,16 +90,17 @@ Modify only the identified files and Unity objects. Follow CLAUDE.md, the NTS ar
 - For UI, inspect anchors, pivots, aspect ratio, sorting order, masking, and mobile resolution behavior.
 - For transitions and animations, validate both entering and leaving states, not just one screenshot.
 - For Android-related changes, validate the target resolution, touch input, performance, and build configuration.
+- Builds: one synchronous `execute_code` call that writes the `BuildReport` summary to a file; no `delayCall` builds (lost on domain reload). See `rules/android-build.md`.
+- Screenshot tools may write into `Assets/Screenshots/`; delete that folder and its `.meta` after use so it never reaches a commit.
+- Before judging a Game View capture, check the Game View resolution preset (Free Aspect makes UI look shifted).
 
-## TR37 Code Constraints
+## Code Constraints
 
-- Preserve `NTS.Core <- NTS.UI <- NTS.Shell <- NTS.MiniGames.<Name>` assembly isolation.
-- Mini-games inherit from `MiniGameBase` and communicate through `MiniGameContext`.
-- Use private `[SerializeField]` fields; avoid public mutable fields.
-- Never use `Find`, `GetComponent`, `Camera.main`, LINQ, or allocations in `Update`/`FixedUpdate` hot paths.
-- Cache component references in `Awake`.
-- Use `Core/SaveManager` for persistence and `Core/Log` for logs.
-- Do not add monetization SDKs or unrelated packages.
+- Private `[SerializeField]` fields for new code; existing public serialized fields stay until scenes/prefabs are checked (`Restored`).
+- Never use `Find`, `GetComponent`, `Camera.main`, LINQ, or allocations in `Update`/`FixedUpdate` hot paths; cache references in `Awake`.
+- `(NTS profile)`: preserve `NTS.Core <- NTS.UI <- NTS.Shell <- NTS.<Game>` assembly isolation; persistence via `Core/SaveManager`, logs via `Core/Log`.
+- Project-specific frameworks (e.g. TRG37 `MiniGameBase`/`MiniGameContext`) are listed in that project's `<stt>_claude.md`.
+- Do not add SDKs or packages the task did not ask for.
 - Keep a back path for every UI screen.
 
 ## Completion Report

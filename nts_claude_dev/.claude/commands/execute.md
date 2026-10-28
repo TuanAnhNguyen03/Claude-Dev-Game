@@ -57,6 +57,8 @@ Verify the task is ready to execute:
 2. Core Logic (Implement Managers, singleton setup, logic controllers)
    ↓
 3. Gameplay/UI (Implement components attached to Prefabs, hook up UI)
+   ↓
+4. Ads/SDK — ONLY in the ads phase after user confirmation (rules/ads-integration.md, NTS-Ads-Setup checklists)
 ```
 
 ### 3.2.1 Route Unity scripts through @dev Mode B (MANDATORY):

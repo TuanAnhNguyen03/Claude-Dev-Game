@@ -31,11 +31,13 @@ Không chứa code game, asset hay thông tin riêng của một game cụ thể
 | 12 | **Templates file Claude** | `nts_claude_dev/CLAUDE.md` (chung) và `stt_claude.template.md` (riêng game, có `profile` / `unity_root` / `mcp_instance`) |
 | 13 | **Profile** `NTS` / `Restored` / `Custom` | Cùng một bộ rule dùng được cho game dựng mới theo NTS lẫn project phục hồi/port (giữ GUID, giữ cấu trúc cũ) — `MAP.md` §1b |
 | 14 | **Registry project** | Chỉ mục project trong workspace (Editor version, profile gợi ý, việc cần làm để theo chuẩn) — `MAP.md` §8 |
-| 15 | **`AGENTS.md`** | Entry cho agent khác (Codex...) trỏ về cùng bộ quy chuẩn |
+| 15 | **`AGENTS.md`** | Entry Codex cho repo quy chuẩn và mẫu riêng cho từng game |
 
 ## Skill/tool global đi kèm quy trình (cài riêng, không nằm trong repo)
 
 `unity-mcp-skill`, `unity-mobile-arch`, `ponytail` (+review/audit), `graphify` (đồ thị code), `webapp-testing`/`playwright-cli` (chỉ web/GDD), `frontend-design`... — bảng đầy đủ ở `CLAUDE.md` mục 3 và `MAP.md` mục 6.
+
+Trạng thái cài đặt trên máy phát triển, kèm mức bằng chứng, nằm ở [TOOLING_STATUS.md](TOOLING_STATUS.md). Danh sách này không đồng nghĩa các skill Claude đã được cài cho Codex.
 
 ## Cách dùng cho game mới
 
@@ -45,6 +47,12 @@ Không chứa code game, asset hay thông tin riêng của một game cụ thể
 4. Mở Unity Editor, bật MCP server, thử `ping`.
 5. (Tuỳ chọn) `graphify update Assets/Scripts`.
 
+### Dùng thêm với Codex
+
+Copy `nts_claude_dev/AGENTS.md` vào root repo game và điền `{{STT}}`, `{{SHARED_RULES_PATH}}`. Giữ `CLAUDE.md` và `.claude/` nếu game cũng dùng Claude Code. Codex đọc `AGENTS.md` theo vị trí repo; file `AGENTS.md` tại repo quy chuẩn này không tự áp dụng cho repo game khác.
+
+Codex dùng các rule/template hiện có bằng cách đọc file được chỉ dẫn trong `AGENTS.md`. Cấu hình `.claude/settings.json`, slash command, subagent và hook của Claude Code không tự chạy trong Codex. Kết nối Unity MCP cho Codex cần cấu hình và xác minh riêng. Mẫu chỉ thêm hướng dẫn; chưa cài hoặc kích hoạt MCP.
+
 Thứ tự ưu tiên khi xung đột: `<stt>_claude.md` > `CLAUDE.md` project > rules > ClaudeDev > global.
 
 ## Cấu trúc
@@ -53,9 +61,9 @@ Thứ tự ưu tiên khi xung đột: `<stt>_claude.md` > `CLAUDE.md` project > 
 Claude-Dev-Game/
 ├─ CLAUDE.md
 ├─ MAP.md
-├─ AGENTS.md · README.md · CHANGELOG.md · VERSION
+├─ AGENTS.md · README.md · TOOLING_STATUS.md · CHANGELOG.md · VERSION
 └─ nts_claude_dev/
-   ├─ CLAUDE.md · stt_claude.template.md · .mcp.json · .gitignore
+   ├─ AGENTS.md · CLAUDE.md · stt_claude.template.md · .mcp.json · .gitignore
    └─ .claude/ { settings.json, statusline.sh, rules/, commands/, agents/, templates/, hooks/, skills/ }
 ```
 

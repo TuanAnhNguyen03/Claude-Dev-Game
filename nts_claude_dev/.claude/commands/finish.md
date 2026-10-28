@@ -17,7 +17,7 @@ User calls:
 
 ### 1.1 If user did NOT provide task_name:
 Agent identifies task from conversation:
-1. Find task.md and implementation_plan.md created in this conversation (in `brain/<conversation-id>/`)
+1. Find task.md and implementation_plan.md created in this conversation (in `brain/<task>/`)
 2. Use conversation content to identify the feature being worked on
 3. If uncertain, ask user: "Do you want to /finish task [name]?"
 
@@ -35,7 +35,7 @@ If the conversation has no artifacts:
    ## Learnings
    - [Learning 1]
    ```
-3. Still update `.agents/rules/GEMINI.md` if there are noteworthy learnings
+3. Still update `<stt>_claude.md` (or propose a scaffold change) if there are noteworthy learnings
 
 > [!TIP]
 > The agent remembers the current task throughout the conversation so `/finish` doesn't need the task name.
@@ -59,20 +59,24 @@ Update the task file:
 ```text
 What type of learning is this?
 │
-├─► Universal/Global rule that applies across ALL domains?
-│   └─► ✅ `.agents/rules/GEMINI.md` (Section: Critical Rules or Learned Patterns)
-│       Example: "Always use absolute paths", "Never commit plain text passwords"
+├─► Rule that applies to EVERY project in the workspace?
+│   └─► ✅ Propose a change to the ClaudeDev scaffold (`nts_claude_dev/.claude/rules|commands|skills`) + `CHANGELOG.md`
+│       **⚠️ MUST ask user approval** — it ships to all games. Keep it generic (game names only as measured examples).
+│       Example: "Never git checkout with the Editor open", "Never push a shared submodule"
+│
+├─► Rule/decision for THIS project only?
+│   └─► ✅ `<stt>_claude.md` (rules / decisions / status sections)
 │
 ├─► Specific rule, pattern, or deep technique for a specific domain?
-│   └─► ✅ `.agents/learned/[domain].md`
+│   └─► ✅ `.claude/learned/[domain].md` (local, gitignored)
 │       Example domains: `unity-dev.md`, `playable.md`, `art-2d.md`, `ui.md`, `game-designer.md`
 │       Example learning: "Use Prefab Variants for ScriptableObjects", "Phaser 3 texture packing"
 │
 ├─► Improvement to PLANNING or WORKFLOW processes?
-│   └─► ✅ `.agents/workflows/*.md` — **⚠️ MUST ask user approval before modifying workflow!**
+│   └─► ✅ `.claude/commands/*.md` (and the scaffold copy) — **⚠️ MUST ask user approval before modifying workflow!**
 │
 ├─► Debugging insight (root cause analysis, non-obvious bug)?
-│   └─► ✅ `.agents/learned/[domain].md` (relevant domain file, add "Gotchas" section)
+│   └─► ✅ `.claude/learned/[domain].md` (relevant domain file, add "Gotchas" section)
 │       Format: **[Module] [Symptom]**: Root cause was [X] because [Y]
 │
 └─► Only applies to this task, not reusable?
@@ -81,7 +85,7 @@ What type of learning is this?
 
 > [!TIP]
 > **Dual-category tiebreaker**: When a learning fits multiple categories (e.g., both a gotcha and a pattern),
-> place it in the higher-priority location. `GEMINI.md` always wins.
+> place it in the higher-priority location. scaffold rule > `<stt>_claude.md` > `.claude/learned/`.
 
 ### 3.3 Quality Gate — Entry MUST pass ALL 3 filters
 
@@ -93,9 +97,9 @@ Every candidate entry must pass these 3 filters before being written. If it fail
 - ✅ ACCEPT only if discovered through actual debugging or unexpected behavior in THIS task
 
 **Filter 2 — Non-Duplication** (Does this ALREADY exist somewhere?)
-- Search `.agents/skills/game-dev-unity/sub-skill/*.md` for the same concept
-- Search `.agents/knowledge/` for the same pattern
-- Search the target `.agents/learned/*.md` file for semantically similar entries
+- Search `.claude/rules/*.md`, `.claude/skills/`, `~/.claude/skills/` and `<stt>_claude.md` for the same concept
+- Search `.claude/knowledge/` (if present) for the same pattern
+- Search the target `.claude/learned/*.md` file for semantically similar entries
 - ❌ REJECT if covered by existing sub-skill rules (even partially)
 - ❌ REJECT if an existing learned entry covers >80% of the same topic → MERGE instead of appending
 - ✅ ACCEPT only if this is a genuinely NEW insight not captured anywhere
@@ -114,12 +118,13 @@ Every candidate entry must pass these 3 filters before being written. If it fail
 
 | Priority | File | When to update | Agent reads when |
 |----------|------|----------------|------------------|
-| 🥇 1st | `.agents/rules/GEMINI.md` | Universal/Global rules | **Every conversation** |
-| 🥈 2nd | `.agents/learned/[domain].md`| Domain-specific knowledge | When working within domain |
-| 🥉 3rd | `.agents/workflows/*.md` | Process improvements | When calling workflow |
+| 🥇 1st | `<stt>_claude.md` | Project rules, decisions, status | **Every conversation** (imported by `CLAUDE.md`) |
+| 🥈 2nd | Scaffold `.claude/rules/*.md` (user-approved) | Cross-project rules | When files match the rule glob |
+| 🥉 3rd | `.claude/learned/[domain].md` | Domain gotchas | When working within domain |
+| 4th | `.claude/commands/*.md` | Process improvements | When calling the command |
 
 > [!IMPORTANT]
-> **`.agents/rules/GEMINI.md` is the primary location** because agents ALWAYS read this file first. Keep it strict to avoid bloat.
+> **`<stt>_claude.md` is the primary location** because it is always loaded via `CLAUDE.md`. Keep it strict; cross-project rules go to the scaffold, not here.
 > Only update workflows when the learning relates to PROCESS, not CODE.
 
 ### 3.5 Dedup & Compaction Check (BEFORE writing new entry)
@@ -134,16 +139,8 @@ Before appending, read the target learned file and search for semantically simil
 - Keep formatting consistent with existing content
 - Note the source of the learning (which task)
 
-### 3.7 Re-vectorize Global Knowledge Graph
-// turbo
-After writing any new entries to `.agents/learned/` or `.agents/rules/`, rebuild the GraphRAG FAISS index so new learnings become immediately searchable by all skills:
-
-```
-python .agents/scripts/build_knowledge_graph.py
-```
-
-Wait for completion. Verify output shows node count significantly greater than 2.
-This step **closes the learning loop** — without it, new learnings are invisible to future agent queries.
+### 3.7 Refresh code graph (optional)
+If the project uses `graphify` and code changed, run `graphify update <Scripts path>` so `GRAPH_REPORT.md` matches HEAD.
 
 ## Step 4: Create Walkthrough
 // turbo
@@ -168,7 +165,7 @@ Create `walkthrough.md` in brain/ to document results:
 ```
 
 > [!TIP]
-> walkthrough.md is auto-saved by Antigravity to `brain/<conversation-id>/` — no manual management needed.
+> `brain/` is local (gitignored); never commit walkthroughs into the game repo.
 
 ## Step 4.5: Deeper Learning (Optional)
 If the task was complex or had many valuable insights:
@@ -194,7 +191,7 @@ Notify the user:
 ✅ **Task Completed**: [feature_name]
 
 ### Files Updated:
-- `.agents/rules/GEMINI.md` or `.agents/learned/[domain].md`: Added [pattern] rule
+- `<stt>_claude.md` or `.claude/learned/[domain].md`: Added [pattern] rule
 
 ### Learnings Extracted:
 1. **Pattern**: [reusable pattern description]

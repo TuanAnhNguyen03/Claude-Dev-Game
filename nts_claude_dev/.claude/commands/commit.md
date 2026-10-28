@@ -12,6 +12,15 @@ First, automatically `git add` all files that were modified or created during th
 
 If nothing is staged (no files changed in conversation and nothing pre-staged), notify user: "No files to commit."
 
+### 1b. Hygiene gate (`rules/git-release.md`)
+// turbo
+Unstage and report (do not delete without asking) anything that must not ship:
+- AI/agent files: `CLAUDE.md`, `<stt>_claude.md`, `AGENTS.md`, `.claude/`, `.mcp.json`, `brain/`, `production/`, screenshots/evidence, one-off helper scripts (unless `<stt>_claude.md` says they are shared).
+- Regenerated files: `Assets/GeneratedLocalRepo/`, `FirebaseCrashlytics.androidlib/`, `Assets/_Recovery/`, `Assets/Screenshots/`, `*.orig`, `*.rej`, logs, apk/aab.
+- `.meta` without its asset or asset without its `.meta` (`git diff --cached --name-status`).
+- A shared submodule pointer moved to a commit not on its remote (`git -C <submodule> branch -r --contains <sha>` empty) — see `rules/git-release.md`.
+- Secrets: keystore passwords, API keys, tokens in any staged file.
+
 ### 2. Analyze changes
 // turbo
 Run `git diff --cached` to read the actual diff content. For large diffs, focus on the key changes.
@@ -44,7 +53,8 @@ Based on the diff analysis, generate a commit message following **Conventional C
 - Files in `Assets/Scenes/` → scope: `scenes`
 - Files in `Assets/ScriptableObjects/` → scope: `data`
 - Files in `Assets/Plugins/` → scope: `plugins`
-- Files in `.agents/` → scope: `workflow`
+- Files in `.claude/` → scope: `workflow`
+- Files in `CustomPatchTools/` or a submodule → scope: `foundation`
 - Files in `Docs/` → scope: `docs`
 - Mixed modules → scope: most-changed module, mention others in body
 
@@ -91,3 +101,9 @@ Run `git commit -m "<title>" -m "<body>"` directly (user approves via command ap
 ### 6. Confirm
 
 Show the result of `git log -1 --oneline` to confirm the commit was created successfully.
+
+### 7. Merge / push (only when the user asks)
+
+- Fast-forward another branch without checkout (Unity may be open): `git fetch . <from>:<to>`.
+- Push only the branches the user named, of the game repo only: `git push origin <branches>`. Never push a shared submodule unless the user names that repo.
+- After push: `git fetch origin` and confirm local and `origin/<branch>` SHAs match; for LFS repos `git lfs push --dry-run origin <branch>` prints nothing.

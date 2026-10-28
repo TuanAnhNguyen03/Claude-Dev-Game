@@ -52,7 +52,7 @@ If ANY is "Yes" → activate `brainstorming` skill → get validated design → 
 Read relevant context files (SSOT):
 - Game Design Doc: `Docs/GDD.md` (if exists)
 - Project Architecture: `Docs/Architecture.md` (if exists)
-- Stack-specific: `docs/learned/` (relevant file)
+- Stack-specific: `.claude/learned/` (relevant file)
 
 Search codebase for similar implementations:
 
@@ -77,6 +77,7 @@ Create 2 artifacts (auto-saved to `brain/<conversation-id>/`):
 - [ ] Data Layer (ScriptableObjects/JSON)
 - [ ] Core Logic Layer
 - [ ] UI/Gameplay Layer
+- [ ] Ads/SDK (chỉ khi task là phase ads và user đã xác nhận — NTS-Ads-Setup)
 - [ ] Tests passed in Editor
 - [ ] Learnings extracted
 ```

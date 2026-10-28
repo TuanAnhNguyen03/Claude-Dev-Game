@@ -13,6 +13,6 @@ Verify only the requested scope. With Unity Editor available:
 4. Read Console errors/warnings tied to the changed files.
 5. Open affected scenes/prefabs; check missing scripts/references; capture Game View for UI/scene changes.
 6. Confirm Build Settings; run the requested target build only if modules/SDKs are installed.
-7. Device checks use the script/path declared in `<stt>_claude.md`; save evidence under the project's evidence folder.
+7. Device checks: follow `rules/device-testing.md` and `/device-test` (`.claude/scripts/adb-device.sh`); package/APK path from `<stt>_claude.md`; evidence under `production/device-evidence/`. Emulator results are labelled `emulator`.
 
 Report each check as passed / failed / not run with evidence (see `rules/evidence.md`). Do not repair unrelated assets during verification.

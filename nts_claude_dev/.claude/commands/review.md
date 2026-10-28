@@ -5,7 +5,7 @@ description: Code review before commit - check patterns and conventions
 # Code Review Workflow
 
 > Review code against project conventions before committing.
-> Ensure compliance with patterns in GEMINI.md and learned docs.
+> Ensure compliance with `.claude/rules/`, `<stt>_claude.md` and learned docs.
 
 ## Trigger
 User calls:
@@ -35,8 +35,8 @@ Review by module path
 ## Step 2: Load Review Checklist
 // turbo
 Load rules from:
-1. `.agents/rules/GEMINI.md` → Code Patterns, Critical Rules
-2. `docs/learned/` (relevant stack file)
+1. `.claude/rules/*.md` matching the changed paths (always: `evidence.md`, `git-release.md`) + `<stt>_claude.md` (profile, exceptions)
+2. `.claude/learned/` (relevant domain file, if present)
 
 ## Step 3: Review Code
 // turbo
@@ -104,7 +104,7 @@ Output format:
 
 ### 🔴 Critical
 1. **[file.cs:123]**: [description]
-   - **Rule violated**: [rule from GEMINI.md]
+   - **Rule violated**: [rule file + line]
    - **Suggested fix**: [how to fix]
 
 ### 🟡 Warning
